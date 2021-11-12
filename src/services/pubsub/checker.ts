@@ -10,12 +10,8 @@ export interface HealthChecker {
   build(data: AnyMap, error: any): AnyMap;
   check(): Promise<AnyMap>;
 }
-export interface CheckResult {
-  status: string;
-  details: AnyMap;
-}
 
-export class PubsubChecker {
+export class PubSubChecker {
   subscription: Subscription;
   constructor(
     private projectId: string,

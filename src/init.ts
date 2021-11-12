@@ -6,7 +6,7 @@ import { ApplicationContext } from './context';
 import { HealthController } from './controllers/HealthController';
 import { User } from './models/User';
 // import { Publisher } from './services/pubsub/publisher';
-import { PubsubChecker } from './services/pubsub/pubsubChecker';
+import { PubSubChecker } from './services/pubsub/checker';
 import { SimpleSubscriber } from './services/pubsub/subcriber';
 
 const topicId = 'users';
@@ -51,7 +51,7 @@ const user: Attributes = {
 
 const retries = [5000, 10000, 20000];
 export function createContext(db: Db): ApplicationContext {
-  const pubsubChecker = new PubsubChecker(projectId, subscriptionName, cre);
+  const pubsubChecker = new PubSubChecker(projectId, subscriptionName, cre);
   const healthController = new HealthController([pubsubChecker]);
   const writer = new MongoInserter(db.collection('users'), 'id');
   const retryWriter = new RetryWriter(writer.write, retries, writeUser, log);

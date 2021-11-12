@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
+import { HealthChecker } from '../services/pubsub/checker';
 import { check } from '../services/pubsub/health';
-import { HealthChecker } from '../services/pubsub/pubsubChecker';
 
 export class HealthController {
   constructor(protected checkers: HealthChecker[]) {
