@@ -1,12 +1,12 @@
-import { HealthController } from './controllers/HealthController';
 import { Db } from 'mongodb';
 import { MongoInserter } from 'mongodb-extension';
 import { ErrorHandler, Handler, RetryWriter } from 'mq-one';
-import { PubsubChecker } from './services/pubsub/pubsubChecker';
 import { Attributes, Validator } from 'validator-x';
 import { ApplicationContext } from './context';
+import { HealthController } from './controllers/HealthController';
 import { User } from './models/User';
-import { Publisher } from './services/pubsub/publisher';
+// import { Publisher } from './services/pubsub/publisher';
+import { PubsubChecker } from './services/pubsub/pubsubChecker';
 import { SimpleSubscriber } from './services/pubsub/subcriber';
 
 const topicId = 'users';
@@ -55,7 +55,7 @@ export function createContext(db: Db): ApplicationContext {
   const healthController = new HealthController([pubsubChecker]);
   const writer = new MongoInserter(db.collection('users'), 'id');
   const retryWriter = new RetryWriter(writer.write, retries, writeUser, log);
-  const publisher = new Publisher<User>(topicId, projectId, cre, log);
+  // const publisher = new Publisher<User>(topicId, projectId, cre, log);
   // const retryService = new RetryService<User, string>(publisher.publish, log, log);
   const errorHandler = new ErrorHandler(log);
   const validator = new Validator<User>(user, true);

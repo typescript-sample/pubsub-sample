@@ -1,4 +1,4 @@
-import {Request, Response} from 'express';
+import { Request, Response } from 'express';
 import { check } from '../services/pubsub/health';
 import { HealthChecker } from '../services/pubsub/pubsubChecker';
 

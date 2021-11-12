@@ -1,5 +1,6 @@
 import { IAM } from '@google-cloud/pubsub';
 import { CallOptions } from '@google-cloud/pubsub';
+
 export interface StringMap {
   [key: string]: string;
 }

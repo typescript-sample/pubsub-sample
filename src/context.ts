@@ -1,5 +1,5 @@
-import { HealthController } from './controllers/HealthController';
 import { StringMap } from 'mongodb-extension';
+import { HealthController } from './controllers/HealthController';
 import { User } from './models/User';
 
 export interface ApplicationContext {
