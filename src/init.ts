@@ -9,6 +9,8 @@ import { User } from './models/User';
 import { PubSubChecker } from './services/pubsub/checker';
 import { SimpleSubscriber } from './services/pubsub/subcriber';
 
+const projectId = 'go-firestore-rest-api';
+const subscriptionName = 'users-sub';
 const topicId = 'users';
 const cre = {
   'type': 'service_account',
@@ -22,9 +24,6 @@ const cre = {
   'auth_provider_x509_cert_url': 'https://www.googleapis.com/oauth2/v1/certs',
   'client_x509_cert_url': 'https://www.googleapis.com/robot/v1/metadata/x509/pubsub%40go-firestore-rest-api.iam.gserviceaccount.com'
 };
-
-const projectId = 'go-firestore-rest-api';
-const subscriptionName = 'users-sub';
 
 const user: Attributes = {
   id: {
@@ -51,7 +50,7 @@ const user: Attributes = {
 
 const retries = [5000, 10000, 20000];
 export function createContext(db: Db): ApplicationContext {
-  const pubsubChecker = new PubSubChecker(projectId, subscriptionName, cre);
+  const pubsubChecker = new PubSubChecker(projectId, cre, subscriptionName);
   const healthController = new HealthController([pubsubChecker]);
   const writer = new MongoInserter(db.collection('users'), 'id');
   const retryWriter = new RetryWriter(writer.write, retries, writeUser, log);
@@ -60,7 +59,7 @@ export function createContext(db: Db): ApplicationContext {
   const errorHandler = new ErrorHandler(log);
   const validator = new Validator<User>(user, true);
   const handlerPubSub = new Handler<User, string>(retryWriter.write, validator.validate, [], errorHandler.error, log, log, undefined, 3, 'retry');
-  const subscriber = new SimpleSubscriber<User>(projectId, subscriptionName, cre);
+  const subscriber = new SimpleSubscriber<User>(projectId, cre, subscriptionName);
   const ctx: ApplicationContext = { subscribe: subscriber.subscribe, handle: handlerPubSub.handle, healthController };
   return ctx;
 }

@@ -3,13 +3,13 @@ import { CredentialBody, ExternalAccountClientOptions } from 'google-auth-librar
 import { checkPermission, StringMap } from './core';
 
 export class Publisher<T> {
-  private topic: Topic;
+  topic: Topic;
   constructor(
-    private topicName: string,
-    private projectId: string,
-    private credentials: CredentialBody | ExternalAccountClientOptions,
-    private log?: (msg: any) => void) {
-    this.topic = new PubSub({ projectId: this.projectId, credentials: this.credentials }).topic(this.topicName);
+    public topicName: string,
+    projectId: string,
+    credentials: CredentialBody | ExternalAccountClientOptions,
+    public log?: (msg: any) => void) {
+    this.topic = new PubSub({ projectId, credentials }).topic(this.topicName);
     checkPermission(this.topic.iam, ['pubsub.topics.publish'], this.log);
     this.publish = this.publish.bind(this);
   }
@@ -26,9 +26,9 @@ export class Publisher<T> {
 export class SimplePublisher<T> {
   pubsub: PubSub;
   constructor(
-    private projectId: string,
-    private credentials: CredentialBody | ExternalAccountClientOptions) {
-    this.pubsub = new PubSub({ projectId: this.projectId, credentials: this.credentials });
+    projectId: string,
+    credentials: CredentialBody | ExternalAccountClientOptions) {
+    this.pubsub = new PubSub({ projectId, credentials });
     this.publish = this.publish.bind(this);
   }
   publish(topicName: string, data: T, attributes?: StringMap): Promise<string> {

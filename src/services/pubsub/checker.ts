@@ -14,12 +14,12 @@ export interface HealthChecker {
 export class PubSubChecker {
   subscription: Subscription;
   constructor(
-    private projectId: string,
+    projectId: string,
+    credentials: CredentialBody | ExternalAccountClientOptions,
     private subscriptionName: string,
-    private credentials: CredentialBody | ExternalAccountClientOptions,
     public service?: string, private timeout?: number
   ) {
-    this.subscription = new PubSub({ projectId: this.projectId, credentials: this.credentials }).subscription(this.subscriptionName);
+    this.subscription = new PubSub({ projectId, credentials }).subscription(this.subscriptionName);
     this.check = this.check.bind(this);
     this.name = this.name.bind(this);
     this.build = this.build.bind(this);
