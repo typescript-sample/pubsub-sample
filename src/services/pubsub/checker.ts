@@ -16,10 +16,10 @@ export class PubSubChecker {
   constructor(
     projectId: string,
     credentials: CredentialBody | ExternalAccountClientOptions,
-    private subscriptionName: string,
+    subscriptionName: string,
     public service?: string, private timeout?: number
   ) {
-    this.subscription = new PubSub({ projectId, credentials }).subscription(this.subscriptionName);
+    this.subscription = new PubSub({ projectId, credentials }).subscription(subscriptionName);
     this.check = this.check.bind(this);
     this.name = this.name.bind(this);
     this.build = this.build.bind(this);
@@ -31,7 +31,7 @@ export class PubSubChecker {
         await checkPermission(this.subscription.iam, ['pubsub.subscriptions.consume'], undefined);
         resolve(obj);
       } catch (err) {
-        reject(`Database down!`);
+        reject(`pubsub is down`);
       }
     });
     if (!this.timeout) {
