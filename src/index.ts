@@ -3,8 +3,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import http from 'http';
 import { connectToDb } from 'mongodb-extension';
-import { createContext } from './init';
-import { route } from './route';
+import { createContext } from './context';
 
 dotenv.config();
 
@@ -19,7 +18,7 @@ app.use(json());
 connectToDb(`${mongoURI}`, `${mongoDB}`).then(db => {
   const ctx = createContext(db);
   ctx.subscribe(ctx.handle);
-  route(app, ctx);
+  app.get('/health', ctx.health.check);
   http.createServer(app).listen(port, () => {
     console.log('Start server at port ' + port);
   });
