@@ -51,16 +51,16 @@ const user: Attributes = {
 const retries = [5000, 10000, 20000];
 export function createContext(db: Db): ApplicationContext {
   const pubsubChecker = new PubSubChecker(projectId, cre, subscriptionName);
-  const healthController = new HealthController([pubsubChecker]);
+  const health = new HealthController([pubsubChecker]);
   const writer = new MongoInserter(db.collection('users'), 'id');
   const retryWriter = new RetryWriter(writer.write, retries, writeUser, log);
   // const publisher = new Publisher<User>(topicId, projectId, cre, log);
   // const retryService = new RetryService<User, string>(publisher.publish, log, log);
   const errorHandler = new ErrorHandler(log);
   const validator = new Validator<User>(user, true);
-  const handlerPubSub = new Handler<User, string>(retryWriter.write, validator.validate, [], errorHandler.error, log, log, undefined, 3, 'retry');
+  const handler = new Handler<User, string>(retryWriter.write, validator.validate, [], errorHandler.error, log, log, undefined, 3, 'retry');
   const subscriber = new SimpleSubscriber<User>(projectId, cre, subscriptionName);
-  const ctx: ApplicationContext = { subscribe: subscriber.subscribe, handle: handlerPubSub.handle, healthController };
+  const ctx: ApplicationContext = { subscribe: subscriber.subscribe, handle: handler.handle, health };
   return ctx;
 }
 
