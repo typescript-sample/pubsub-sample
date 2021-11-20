@@ -1,15 +1,14 @@
 import { HealthController } from 'express-ext';
 import { Db } from 'mongodb';
 import { MongoInserter } from 'mongodb-extension';
-import { ErrorHandler, Handler, RetryWriter, StringMap } from 'mq-one';
+import { ErrorHandler, Handler, RetryService, StringMap } from 'mq-one';
 import { Attributes, Validator } from 'validator-x';
-// import { Publisher } from './services/pubsub/publisher';
-import { createPubSubChecker, createSubscriber } from './pubsub';
+import { createPublisher, createPubSubChecker, createSubscriber } from './pubsub';
 
 const projectId = 'go-firestore-rest-api';
 const subscriptionName = 'users-sub';
-// const topicId = 'users';
-const cre = {
+const topicId = 'users';
+const credentials = {
   'type': 'service_account',
   'project_id': 'go-firestore-rest-api',
   'private_key_id': 'df1e6c245486c90c182edba78ecd0d4af7ecb994',
@@ -52,7 +51,7 @@ export const user: Attributes = {
   }
 };
 
-const retries = [5000, 10000, 20000];
+// const retries = [5000, 10000, 20000];
 
 export interface ApplicationContext {
   handle: (data: User, header?: StringMap) => Promise<number>;
@@ -61,16 +60,16 @@ export interface ApplicationContext {
 }
 
 export function createContext(db: Db): ApplicationContext {
-  const pubsubChecker = createPubSubChecker(projectId, cre, subscriptionName);
+  const pubsubChecker = createPubSubChecker(projectId, credentials, subscriptionName);
   const health = new HealthController([pubsubChecker]);
   const writer = new MongoInserter(db.collection('users'), 'id');
-  const retryWriter = new RetryWriter(writer.write, retries, writeUser, log);
-  // const publisher = new Publisher<User>(topicId, projectId, cre, log);
-  // const retryService = new RetryService<User, string>(publisher.publish, log, log);
+  // const retryWriter = new RetryWriter(writer.write, retries, writeUser, log);
+  const publisher = createPublisher<User>(topicId, projectId, credentials, log);
+  const retryService = new RetryService<User, string>(publisher.publish, log, log);
   const errorHandler = new ErrorHandler(log);
   const validator = new Validator<User>(user, true);
-  const handler = new Handler<User, string>(retryWriter.write, validator.validate, [], errorHandler.error, log, log, undefined, 3, 'retry');
-  const subscriber = createSubscriber<User>(projectId, cre, subscriptionName);
+  const handler = new Handler<User, string>(writer.write, validator.validate, [], errorHandler.error, log, log, retryService.retry, 3, 'retry');
+  const subscriber = createSubscriber<User>(projectId, credentials, subscriptionName);
   const ctx: ApplicationContext = { subscribe: subscriber.subscribe, handle: handler.handle, health };
   return ctx;
 }
