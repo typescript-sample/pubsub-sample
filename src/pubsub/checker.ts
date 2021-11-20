@@ -11,15 +11,16 @@ export interface HealthChecker {
   check(): Promise<AnyMap>;
 }
 
+export function createPubSubChecker(projectId: string,
+  credentials: CredentialBody | ExternalAccountClientOptions,
+  subscriptionName: string, service?: string, timeout?: number): PubSubChecker {
+  const subscription = new PubSub({ projectId, credentials }).subscription(subscriptionName);
+  return new PubSubChecker(subscription, service, timeout);
+}
 export class PubSubChecker {
-  subscription: Subscription;
-  constructor(
-    projectId: string,
-    credentials: CredentialBody | ExternalAccountClientOptions,
-    subscriptionName: string,
-    public service?: string, private timeout?: number
-  ) {
-    this.subscription = new PubSub({ projectId, credentials }).subscription(subscriptionName);
+  timeout?: number;
+  constructor(public subscription: Subscription, public service?: string, timeout?: number) {
+    this.timeout = (timeout ? timeout : 4200);
     this.check = this.check.bind(this);
     this.name = this.name.bind(this);
     this.build = this.build.bind(this);

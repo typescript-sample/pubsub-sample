@@ -2,9 +2,9 @@
   "name": "pubsub-sample",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app",
   "scripts": {
-    "start": "nodemon --exec ts-node-dev src/index.ts",
+    "start": "nodemon --exec ts-node-dev src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint -c .eslintrc.js --ext .ts src"
   },

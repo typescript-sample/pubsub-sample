@@ -1,6 +1,10 @@
-import { IAM } from '@google-cloud/pubsub';
-import { CallOptions } from '@google-cloud/pubsub';
+import { CallOptions, IAM, PubSub } from '@google-cloud/pubsub';
+import { CredentialBody, ExternalAccountClientOptions } from 'google-auth-library';
 
+export function createPubSub(projectId: string, credentials: CredentialBody | ExternalAccountClientOptions): PubSub {
+  const pubsub = new PubSub({ projectId, credentials });
+  return pubsub;
+}
 export interface StringMap {
   [key: string]: string;
 }
