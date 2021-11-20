@@ -3,13 +3,13 @@ import { CredentialBody, ExternalAccountClientOptions } from 'google-auth-librar
 import { checkPermission, createPubSub, StringMap } from './core';
 
 export function createTopic(topicName: string, projectId: string, credentials: CredentialBody | ExternalAccountClientOptions, log?: (msg: any) => void): Topic {
-  const topic = new PubSub({ projectId, credentials }).topic(topicName);
-  checkPermission(topic.iam, ['pubsub.topics.publish'], log);
-  return topic;
+  const t = new PubSub({ projectId, credentials }).topic(topicName);
+  checkPermission(t.iam, ['pubsub.topics.publish'], log);
+  return t;
 }
 export function createPublisher<T>(topicName: string, projectId: string, credentials: CredentialBody | ExternalAccountClientOptions, log?: (msg: any) => void): Publisher<T> {
-  const topic = createTopic(topicName, projectId, credentials, log);
-  return new Publisher<T>(topic);
+  const t = createTopic(topicName, projectId, credentials, log);
+  return new Publisher<T>(t);
 }
 export class Publisher<T> {
   constructor(public topic: Topic) {
@@ -26,8 +26,8 @@ export class Publisher<T> {
   }
 }
 export function createSimplePublisher<T>(projectId: string, credentials: CredentialBody | ExternalAccountClientOptions): SimplePublisher<T> {
-  const pubsub = createPubSub(projectId, credentials);
-  return new SimplePublisher<T>(pubsub);
+  const p = createPubSub(projectId, credentials);
+  return new SimplePublisher<T>(p);
 }
 export class SimplePublisher<T> {
   constructor(public pubsub: PubSub) {

@@ -11,14 +11,12 @@ export interface HealthChecker {
   check(): Promise<AnyMap>;
 }
 
-export function createPubSubChecker(projectId: string,
-  credentials: CredentialBody | ExternalAccountClientOptions,
-  subscriptionName: string, service?: string, timeout?: number): PubSubChecker {
-  const subscription = new PubSub({ projectId, credentials }).subscription(subscriptionName);
-  return new PubSubChecker(subscription, service, timeout);
+export function createPubSubChecker(projectId: string, credentials: CredentialBody | ExternalAccountClientOptions, subscriptionName: string, service?: string, timeout?: number): PubSubChecker {
+  const s = new PubSub({ projectId, credentials }).subscription(subscriptionName);
+  return new PubSubChecker(s, service, timeout);
 }
 export class PubSubChecker {
-  timeout?: number;
+  timeout: number;
   constructor(public subscription: Subscription, public service?: string, timeout?: number) {
     this.timeout = (timeout ? timeout : 4200);
     this.check = this.check.bind(this);
@@ -35,9 +33,6 @@ export class PubSubChecker {
         reject(`pubsub is down`);
       }
     });
-    if (!this.timeout) {
-      this.timeout = 4200;
-    }
     if (this.timeout > 0) {
       return promiseTimeOut(this.timeout, promise);
     } else {

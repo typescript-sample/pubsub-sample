@@ -3,9 +3,9 @@ import { CredentialBody, ExternalAccountClientOptions } from 'google-auth-librar
 import { checkPermission, StringMap, toString } from './core';
 
 export function createSubscription(projectId: string, credentials: CredentialBody | ExternalAccountClientOptions, subscriptionName: string, logInfo?: (msg: any) => void): Subscription {
-  const subscription = new PubSub({ projectId, credentials }).subscription(subscriptionName);
-  checkPermission(subscription.iam, ['pubsub.subscriptions.consume'], logInfo);
-  return subscription;
+  const s = new PubSub({ projectId, credentials }).subscription(subscriptionName);
+  checkPermission(s.iam, ['pubsub.subscriptions.consume'], logInfo);
+  return s;
 }
 export function createSubscriber<T>(projectId: string, credentials: CredentialBody | ExternalAccountClientOptions, subscriptionName: string, logError?: (msg: any) => void, logInfo?: (msg: any) => void, json?: boolean): Subscriber<T> {
   const s = createSubscription(projectId, credentials, subscriptionName, logInfo);
