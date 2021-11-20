@@ -12,16 +12,20 @@ export function createSubscriber<T>(projectId: string, credentials: CredentialBo
   return new Subscriber<T>(s, logError, json);
 }
 export class Subscriber<T> {
+  ack: boolean;
   constructor(
       public subscription: Subscription,
       public logError?: (msg: any) => void,
-      public json?: boolean) {
+      public json?: boolean,
+      ack?: boolean) {
+    this.ack = (ack === false ? false : true);
     this.subscribe = this.subscribe.bind(this);
   }
   subscribe(handle: (data: T, attributes?: StringMap, raw?: Message) => Promise<number>): void {
     this.subscription.on('message', (message: Message) => {
-      message.ack();
-      // console.log(message);
+      if (this.ack) {
+        message.ack();
+      }
       const data = (this.json ? JSON.parse(message.data.toString()) : message.data.toString());
       try {
         handle(data, message.attributes, message);
