@@ -1,6 +1,6 @@
 import { HealthController } from 'express-ext';
 import { Db } from 'mongodb';
-import { MongoInserter } from 'mongodb-extension';
+import { MongoUpserter } from 'mongodb-extension';
 import { ErrorHandler, Handler, RetryService, StringMap } from 'mq-one';
 import { Attributes, Validator } from 'validator-x';
 import { createPublisher, createPubSubChecker, createSubscriber } from './pubsub';
@@ -62,7 +62,7 @@ export interface ApplicationContext {
 export function createContext(db: Db): ApplicationContext {
   const pubsubChecker = createPubSubChecker(projectId, credentials, subscriptionName);
   const health = new HealthController([pubsubChecker]);
-  const writer = new MongoInserter(db.collection('users'), 'id');
+  const writer = new MongoUpserter(db.collection('users'), 'id');
   // const retryWriter = new RetryWriter(writer.write, retries, writeUser, log);
   const publisher = createPublisher<User>(topicId, projectId, credentials, log);
   const retryService = new RetryService<User, string>(publisher.publish, log, log);
@@ -74,7 +74,7 @@ export function createContext(db: Db): ApplicationContext {
   return ctx;
 }
 export function log(msg: any): void {
-  console.log(JSON.stringify(msg));
+  console.log(typeof msg === 'string' ? msg : JSON.stringify(msg));
 }
 export function writeUser(msg: User): Promise<number> {
   console.log('Error: ' + JSON.stringify(msg));
