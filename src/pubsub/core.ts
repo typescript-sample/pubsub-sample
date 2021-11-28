@@ -31,7 +31,7 @@ function ts(v: any): string {
     return JSON.stringify(v);
   }
 }
-export async function checkPermission(iam: IAM, permissionString: string[], log?: (msg: any) => void) {
+export async function checkPermission(iam: IAM, permissionString: string[], log?: (msg: string) => void) {
   if (!log) {
     log = console.log;
   }

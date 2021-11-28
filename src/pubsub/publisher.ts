@@ -2,12 +2,17 @@ import { PubSub, Topic } from '@google-cloud/pubsub';
 import { CredentialBody, ExternalAccountClientOptions } from 'google-auth-library';
 import { checkPermission, createPubSub, StringMap } from './core';
 
-export function createTopic(topicName: string, projectId: string, credentials: CredentialBody | ExternalAccountClientOptions, log?: (msg: any) => void): Topic {
+export interface PubConfig {
+  projectId: string;
+  topicName: string;
+  credentials: CredentialBody | ExternalAccountClientOptions;
+}
+export function createTopic(topicName: string, projectId: string, credentials: CredentialBody | ExternalAccountClientOptions, log?: (msg: string) => void): Topic {
   const t = new PubSub({ projectId, credentials }).topic(topicName);
   checkPermission(t.iam, ['pubsub.topics.publish'], log);
   return t;
 }
-export function createPublisher<T>(topicName: string, projectId: string, credentials: CredentialBody | ExternalAccountClientOptions, log?: (msg: any) => void): Publisher<T> {
+export function createPublisher<T>(topicName: string, projectId: string, credentials: CredentialBody | ExternalAccountClientOptions, log?: (msg: string) => void): Publisher<T> {
   const t = createTopic(topicName, projectId, credentials, log);
   return new Publisher<T>(t);
 }
