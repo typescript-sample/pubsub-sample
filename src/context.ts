@@ -1,7 +1,7 @@
 import { HealthController } from 'express-ext';
 import { JSONLogger, LogConfig } from 'logger-core';
 import { Db } from 'mongodb';
-import { MongoChecker, MongoInserter } from 'mongodb-extension';
+import { MongoChecker, MongoUpserter } from 'mongodb-extension';
 import { createRetry, ErrorHandler, Handler, NumberMap, RetryConfig, RetryService, StringMap } from 'mq-one';
 import { Attributes, Validator } from 'xvalidators';
 import { createPublisher, createPubSubChecker, createSubscriber, PubConfig, SubConfig } from './pubsub';
@@ -46,8 +46,8 @@ export interface Config {
 }
 export interface ApplicationContext {
   health: HealthController;
-  handle: (data: User, header?: StringMap) => Promise<number>;
   subscribe: (handle: (data: User, header?: StringMap) => Promise<number>) => void;
+  handle: (data: User, header?: StringMap) => Promise<number>;
 }
 
 export function createContext(db: Db, conf: Config): ApplicationContext {
@@ -60,7 +60,7 @@ export function createContext(db: Db, conf: Config): ApplicationContext {
   const subscriber = createSubscriber<User>(conf.sub.projectId, conf.sub.credentials, conf.sub.subscriptionName);
 
   const validator = new Validator<User>(user, true);
-  const writer = new MongoInserter(db.collection('users'), 'id');
+  const writer = new MongoUpserter(db.collection('users'), 'id');
   // const retryWriter = new RetryWriter(writer.write, retries, writeUser, log);
   const errorHandler = new ErrorHandler(logger.error);
   let handler: Handler<User, string>;

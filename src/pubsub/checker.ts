@@ -17,8 +17,10 @@ export function createPubSubChecker(projectId: string, credentials: CredentialBo
 }
 export class PubSubChecker {
   timeout: number;
-  constructor(public subscription: Subscription, public service?: string, timeout?: number) {
+  service: string;
+  constructor(public subscription: Subscription, service?: string, timeout?: number) {
     this.timeout = (timeout ? timeout : 4200);
+    this.service = (service && service.length > 0 ? service : 'pubsub');
     this.check = this.check.bind(this);
     this.name = this.name.bind(this);
     this.build = this.build.bind(this);
@@ -40,9 +42,6 @@ export class PubSubChecker {
     }
   }
   name(): string {
-    if (!this.service) {
-      this.service = 'kafka';
-    }
     return this.service;
   }
   build(data: AnyMap, err: any): AnyMap {

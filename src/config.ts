@@ -1,5 +1,5 @@
 export const config = {
-  port: 8081,
+  port: 8080,
   log: {
     level: 'info',
     map: {
