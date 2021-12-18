@@ -1,9 +1,9 @@
-import { HealthController } from 'express-ext';
-import { JSONLogger, LogConfig } from 'logger-core';
+import { HealthController, LogController } from 'express-ext';
+import { Config, JSONLogger, map } from 'logger-core';
 import { Db } from 'mongodb';
-import { MongoChecker, MongoUpserter } from 'mongodb-extension';
-import { createRetry, ErrorHandler, Handler, NumberMap, RetryConfig, RetryService, StringMap } from 'mq-one';
-import { Attributes, Validator } from 'xvalidators';
+import { Attributes, MongoChecker, MongoUpserter } from 'mongodb-extension';
+import { Consume, createRetry, ErrorHandler, Handle, Handler, NumberMap, RetryConfig, RetryService } from 'mq-one';
+import { Validator } from 'xvalidators';
 import { createPublisher, createPubSubChecker, createSubscriber, PubConfig, SubConfig } from './pubsub';
 
 export interface User {
@@ -32,13 +32,14 @@ export const user: Attributes = {
     length: 14
   },
   dateOfBirth: {
-    type: 'datetime'
+    type: 'datetime',
+    column: 'date_of_birth'
   }
 };
 
-export interface Config {
+export interface Conf {
   port?: number;
-  log: LogConfig;
+  log: Config;
   retries: NumberMap;
   sub: SubConfig;
   retry: RetryConfig;
@@ -46,13 +47,15 @@ export interface Config {
 }
 export interface ApplicationContext {
   health: HealthController;
-  subscribe: (handle: (data: User, header?: StringMap) => Promise<number>) => void;
-  handle: (data: User, header?: StringMap) => Promise<number>;
+  log: LogController;
+  consume: Consume<User>;
+  handle: Handle<User>;
 }
 
-export function createContext(db: Db, conf: Config): ApplicationContext {
+export function useContext(db: Db, conf: Conf): ApplicationContext {
   const retries = createRetry(conf.retries);
   const logger = new JSONLogger(conf.log.level, conf.log.map);
+  const log = new LogController(logger, map);
   const mongoChecker = new MongoChecker(db);
   const pubsubChecker = createPubSubChecker(conf.sub.projectId, conf.sub.credentials, conf.sub.subscriptionName);
   const health = new HealthController([mongoChecker, pubsubChecker]);
@@ -71,7 +74,7 @@ export function createContext(db: Db, conf: Config): ApplicationContext {
   } else {
     handler = new Handler<User, string>(writer.write, validator.validate, retries, errorHandler.error, logger.error, logger.info);
   }
-  const ctx: ApplicationContext = { health, subscribe: subscriber.subscribe, handle: handler.handle };
+  const ctx: ApplicationContext = { health, log, consume: subscriber.subscribe, handle: handler.handle };
   return ctx;
 }
 export function writeUser(msg: User): Promise<number> {

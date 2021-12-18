@@ -1,5 +1,5 @@
 export const config = {
-  port: 8080,
+  port: 8084,
   log: {
     level: 'info',
     map: {
@@ -50,6 +50,22 @@ export const config = {
       'token_uri': 'https://oauth2.googleapis.com/token',
       'auth_provider_x509_cert_url': 'https://www.googleapis.com/oauth2/v1/certs',
       'client_x509_cert_url': 'https://www.googleapis.com/robot/v1/metadata/x509/pubsub%40go-firestore-rest-api.iam.gserviceaccount.com'
+    }
+  }
+};
+
+export const env = {
+  sit: {
+    log: {
+      level: 'error'
+    },
+    mongo: {
+      database: 'masterdata_sit',
+    }
+  },
+  prd: {
+    log: {
+      level: 'error'
     }
   }
 };
