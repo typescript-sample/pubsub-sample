@@ -48,10 +48,10 @@ export interface Conf {
 export interface ApplicationContext {
   health: HealthController;
   log: LogController;
+  produce?: (data: User) => Promise<[string]>;
   consume: Consume<User>;
   handle: Handle<User>;
 }
-
 export function useContext(db: Db, conf: Conf): ApplicationContext {
   const retries = createRetry(conf.retries);
   const logger = new JSONLogger(conf.log.level, conf.log.map);
@@ -61,21 +61,21 @@ export function useContext(db: Db, conf: Conf): ApplicationContext {
   const health = new HealthController([mongoChecker, pubsubChecker]);
 
   const subscriber = createSubscriber<User>(conf.sub.projectId, conf.sub.credentials, conf.sub.subscriptionName);
-
   const validator = new Validator<User>(user, true);
   const writer = new MongoUpserter(db.collection('users'), 'id');
   // const retryWriter = new RetryWriter(writer.write, retries, writeUser, log);
   const errorHandler = new ErrorHandler(logger.error);
-  let handler: Handler<User, string>;
+  let handler: Handler<User, [string]>;
+  let produce: ((data: User) => Promise<[string]>)|undefined;
   if (conf.pub) {
     const publisher = createPublisher<User>(conf.pub.topicName, conf.pub.projectId, conf.pub.credentials, logger.info);
-    const retryService = new RetryService<User, string>(publisher.publish, logger.error, logger.info);
-    handler = new Handler<User, string>(writer.write, validator.validate, [], errorHandler.error, logger.error, logger.info, retryService.retry, conf.retry.limit, conf.retry.name);
+    const retryService = new RetryService<User, [string]>(publisher.publish, logger.error, logger.info);
+    handler = new Handler<User, [string]>(writer.write, validator.validate, [], errorHandler.error, logger.error, logger.info, retryService.retry, conf.retry.limit, conf.retry.name);
+    produce = publisher.publish;
   } else {
-    handler = new Handler<User, string>(writer.write, validator.validate, retries, errorHandler.error, logger.error, logger.info);
+    handler = new Handler<User, [string]>(writer.write, validator.validate, retries, errorHandler.error, logger.error, logger.info);
   }
-  const ctx: ApplicationContext = { health, log, consume: subscriber.subscribe, handle: handler.handle };
-  return ctx;
+  return { health, log, produce, consume: subscriber.subscribe, handle: handler.handle };
 }
 export function writeUser(msg: User): Promise<number> {
   console.log('Error: ' + JSON.stringify(msg));

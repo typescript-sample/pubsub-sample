@@ -77,6 +77,41 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "send to mq",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"01\",\n    \"username\": \"user01\",\n    \"active\": true,\n    \"locked\": false,\n    \"dateOfBirth\": \"2009-12-31T23:59:59.999+07:00\",\n    \"email\": \"test@gmail.com\",\n    \"url\": \"http://test.com\",\n    \"phone\": \"0987654321\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8084/send",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8084",
+					"path": [
+						"send"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
