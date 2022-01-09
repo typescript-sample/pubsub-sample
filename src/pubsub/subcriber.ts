@@ -17,6 +17,8 @@ export function createSubscriber<T>(projectId: string, credentials: CredentialBo
   return new Subscriber<T>(s, logError, json);
 }
 export const createConsumer = createSubscriber;
+export const createReader = createSubscriber;
+export const createReceiver = createSubscriber;
 export type Hanlde<T> = (data: T, attributes?: StringMap, raw?: Message) => Promise<number>;
 export class Subscriber<T> {
   ack: boolean;
@@ -66,3 +68,5 @@ export class Subscriber<T> {
   }
 }
 export const Consumer = Subscriber;
+export const Reader = Subscriber;
+export const Receiver = Subscriber;

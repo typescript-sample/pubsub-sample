@@ -18,6 +18,8 @@ export function createPublisher<T>(topicName: string, projectId: string, credent
   return new Publisher<T>(t);
 }
 export const createProducer = createPublisher;
+export const createWriter = createPublisher;
+export const createSender = createPublisher;
 export class Publisher<T> {
   constructor(public topic: Topic) {
     this.publish = this.publish.bind(this);
@@ -54,6 +56,9 @@ export class Publisher<T> {
   }
 }
 export const Producer = Publisher;
+export const Sender = Publisher;
+export const Writer = Publisher;
+
 export function toBuffer(d: any): Buffer {
   return (typeof d === 'string' ? Buffer.from(d) : Buffer.from(JSON.stringify(d)));
 }
@@ -62,6 +67,9 @@ export function createSimplePublisher<T>(projectId: string, credentials: Credent
   return new SimplePublisher<T>(p);
 }
 export const createSimpleProducer = createSimplePublisher;
+export const createSimpleWriter = createSimplePublisher;
+export const createSimpleSender = createSimplePublisher;
+// tslint:disable-next-line:max-classes-per-file
 export class SimplePublisher<T> {
   constructor(public pubsub: PubSub) {
     this.publish = this.publish.bind(this);
@@ -99,3 +107,5 @@ export class SimplePublisher<T> {
   }
 }
 export const SimpleProducer = SimplePublisher;
+export const SimpleSender = SimplePublisher;
+export const SimpleWriter = SimplePublisher;

@@ -1,5 +1,5 @@
 import { HealthController, LogController } from 'express-ext';
-import { Config, JSONLogger, map } from 'logger-core';
+import { Config, createLogger, map } from 'logger-core';
 import { Db } from 'mongodb';
 import { Attributes, MongoChecker, MongoUpserter } from 'mongodb-extension';
 import { Consume, createRetry, ErrorHandler, Handle, Handler, NumberMap, RetryConfig, RetryService } from 'mq-one';
@@ -38,7 +38,6 @@ export const user: Attributes = {
 };
 
 export interface Conf {
-  port?: number;
   log: Config;
   retries: NumberMap;
   sub: SubConfig;
@@ -54,7 +53,7 @@ export interface ApplicationContext {
 }
 export function useContext(db: Db, conf: Conf): ApplicationContext {
   const retries = createRetry(conf.retries);
-  const logger = new JSONLogger(conf.log.level, conf.log.map);
+  const logger = createLogger(conf.log);
   const log = new LogController(logger, map);
   const mongoChecker = new MongoChecker(db);
   const pubsubChecker = createPubSubChecker(conf.sub.projectId, conf.sub.credentials, conf.sub.subscriptionName);
