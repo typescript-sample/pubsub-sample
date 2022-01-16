@@ -14,13 +14,13 @@ app.use(json());
 
 connectToDb(`${conf.mongo.uri}`, `${conf.mongo.db}`).then(db => {
   const ctx = useContext(db, conf);
-  ctx.consume(ctx.handle);
+  ctx.subscribe(ctx.handle);
   app.get('/health', ctx.health.check);
   app.patch('/log', ctx.log.config);
-  const produce = ctx.produce;
-  if (produce) {
+  const publish = ctx.publish;
+  if (publish) {
     app.post('/send', (req, res) => {
-      produce(req.body).then(r => res.json({ message: 'message was produced'}))
+      publish(req.body).then(r => res.json({ message: 'message was produced'}))
         .catch(err => res.json({ error: err }));
     });
   }

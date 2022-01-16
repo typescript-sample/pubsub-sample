@@ -47,8 +47,8 @@ export interface Conf {
 export interface ApplicationContext {
   health: HealthController;
   log: LogController;
-  produce?: (data: User) => Promise<[string]>;
-  consume: Consume<User>;
+  publish?: (data: User) => Promise<[string]>;
+  subscribe: Consume<User>;
   handle: Handle<User>;
 }
 export function useContext(db: Db, conf: Conf): ApplicationContext {
@@ -65,16 +65,16 @@ export function useContext(db: Db, conf: Conf): ApplicationContext {
   // const retryWriter = new RetryWriter(writer.write, retries, writeUser, log);
   const errorHandler = new ErrorHandler(logger.error);
   let handler: Handler<User, [string]>;
-  let produce: ((data: User) => Promise<[string]>)|undefined;
+  let publish: ((data: User) => Promise<[string]>)|undefined;
   if (conf.pub) {
     const publisher = createPublisher<User>(conf.pub.topicName, conf.pub.projectId, conf.pub.credentials, logger.info);
     const retryService = new RetryService<User, [string]>(publisher.publish, logger.error, logger.info);
     handler = new Handler<User, [string]>(writer.write, validator.validate, [], errorHandler.error, logger.error, logger.info, retryService.retry, conf.retry.limit, conf.retry.name);
-    produce = publisher.publish;
+    publish = publisher.publish;
   } else {
     handler = new Handler<User, [string]>(writer.write, validator.validate, retries, errorHandler.error, logger.error, logger.info);
   }
-  return { health, log, produce, consume: subscriber.subscribe, handle: handler.handle };
+  return { health, log, publish, subscribe: subscriber.subscribe, handle: handler.handle };
 }
 export function writeUser(msg: User): Promise<number> {
   console.log('Error: ' + JSON.stringify(msg));
