@@ -1,10 +1,10 @@
 import { HealthController, LogController } from 'express-ext';
+import { createPublisher, createPubSubChecker, createSubscriber, PubConfig, SubConfig } from 'google-pubsub';
 import { Config, createLogger, map } from 'logger-core';
 import { Db } from 'mongodb';
 import { Attributes, MongoChecker, MongoUpserter } from 'mongodb-extension';
 import { Consume, createRetry, ErrorHandler, Handle, Handler, NumberMap, RetryConfig, RetryService } from 'mq-one';
 import { Validator } from 'xvalidators';
-import { createPublisher, createPubSubChecker, createSubscriber, PubConfig, SubConfig } from './pubsub';
 
 export interface User {
   id: string;
